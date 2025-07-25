@@ -23,7 +23,7 @@ def load_hdf5(f, snapshot, **kwargs):
     
     rg = (c.G * MBH /c.c**2 )
     Tunit = rg/c.c
-#     TODO : double check
+    mas = (rg/dist)* 06264.806*1000.
     time = (int(snapshot) *10. *Tunit).to(units.s, equivalencies=s.GR)    
     
     strokes_ind = 0
@@ -31,7 +31,8 @@ def load_hdf5(f, snapshot, **kwargs):
         width = int(np.sqrt(len(f[keys[strokes_ind]][i])))
         img    = ((np.reshape(f[keys[strokes_ind]][i],(width,width))))
     height = width
-    # print(MBH, dist, freq, time, width, height)
+        
+    
     return d.Image(img, MBH, dist, freq, time, width, height, **kwargs)
 
 def load_img(f, ind, **kwargs):
