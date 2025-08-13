@@ -6,17 +6,38 @@ from . import scale as s
 from . import dalt  as d
 import numpy as np
 
+ 
+def image2d(image, stokes_ind, data_id):
+    """Create 2D array of one of the Stokes parameters for plotting."""
+
+    n_box = len(image[data_id[stokes_ind]])              #depends on camera pixles you chose for GRRT   
+    n_pixel_per_box = len(image[data_id[stokes_ind]][0]) #100
+    pixels = int(np.sqrt(n_pixel_per_box))  # pixels per block side 10x10 
+
+    n_blocks_side = int(round(np.sqrt(n_box)))
+    
+    # Total image dimensions
+    width = n_blocks_side * pixels
+    height = (n_box // n_blocks_side) * pixels
+
+    image_array = np.zeros((height, width), dtype=float)
+
+    for i in range(n_box):
+        block_row = i // n_blocks_side
+        block_col = i % n_blocks_side
+        block_data = np.array(image[data_id[stokes_ind]][i])
+        array = np.reshape(block_data, (pixels, pixels))
+        image_array[
+            block_row*pixels:(block_row+1)*pixels,
+            block_col*pixels:(block_col+1)*pixels
+        ] = array
+
+    return image_array.T  
+
 def load_hdf5(f, snapshot, **kwargs):
 
-    def get(u, k):
-        return u[k][()]
-    
-    # images = h5py.File(f,'r')
-    keys = [key for key in f.keys()]
-    
-    # tauI = f['tau1.000000e+12'][()]
+    data_id = list(f.keys())
 
-    #Note that no flips or transposes have been made.  This may need to occur in analysis scripts.
     MBH = (4.14e6 * units.M_sun).to(units.M_sun, equivalencies=s.GR)
     dist = 8.127 * units.kpc
     freq = 230 * units.GHz
@@ -26,14 +47,14 @@ def load_hdf5(f, snapshot, **kwargs):
     mas = (rg/dist)* 06264.806*1000.
     time = (int(snapshot) *10. *Tunit).to(units.s, equivalencies=s.GR)    
     
-    strokes_ind = 0
-    for i in range(0,len(f[keys[strokes_ind]])):
-        width = int(np.sqrt(len(f[keys[strokes_ind]][i])))
-        img    = ((np.reshape(f[keys[strokes_ind]][i],(width,width))))
-    height = width
-        
+    stokes_ind = 0
+
+    img = image2d(f, stokes_ind, data_id)
+    width, height = img.shape
     
     return d.Image(img, MBH, dist, freq, time, width, height, **kwargs)
+
+
 
 def load_img(f, ind, **kwargs):
     if isinstance(f, h5py.File):
