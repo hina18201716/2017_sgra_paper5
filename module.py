@@ -79,7 +79,7 @@ def plotregion(imgs, ax):
     return handles
 
 
-def plot_va(mov, ax, n, i ): 
+def plot_va(mov, ax, n ): 
     vis = mk.mockserve(mov, N=6000)
 
     U, V = vis.uvd
@@ -94,7 +94,7 @@ def plot_va(mov, ax, n, i ):
     bmax = 20e10
     uvd = np.linspace(0, bmax, 1000)
     
-    # i = 0
+    i = 0
     phi_angle = np.pi * i / 180
     u = uvd * np.cos(phi_angle)
     v = uvd * np.sin(phi_angle)
