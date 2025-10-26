@@ -44,13 +44,15 @@ def load_hdf5(f, snapshot, **kwargs):
     
     rg = (c.G * MBH /c.c**2 )
     Tunit = rg/c.c
-    mas = (rg/dist)* 06264.806*1000.
     time = (int(snapshot) *10. *Tunit).to(units.s, equivalencies=s.GR)    
     
     stokes_ind = 0
 
     img = image2d(f, stokes_ind, data_id)
-    width, height = img.shape
+    
+    halfrange =20
+    width  = 2 * halfrange 
+    height = 2 * halfrange 
     
     return d.Image(img, MBH, dist, freq, time, width, height, **kwargs)
 
