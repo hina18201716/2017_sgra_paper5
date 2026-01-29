@@ -23,20 +23,20 @@ from scipy.stats import norm, poisson
 
 
 def show(vs, s=None, f=None, ax=None, labels=True, **kwargs):
-
+ 
     if vs.ndim != 2:
         if s is None:
             raise ValueError('must specify snapshot number for movie')
         v = vs[s,:,:]
     else:
         v = vs
-
+    
     if f is None:
         f = lambda x: x
 
     if ax is None:
         fig, ax = plt.subplots(1, 1)
-
+    
     ax.imshow(f(v.T), origin='lower', extent=vs.extent, **kwargs)
 
     if labels:
