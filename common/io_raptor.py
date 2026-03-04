@@ -36,7 +36,7 @@ def image2d(image, stokes_ind, data_id):
 
     return image_array
 
-def load_hdf5(f, halfrange, snapshot, mask, resize, **kwargs):
+def load_hdf5(f, halfrange, snapshot, mask, onlymask, resize, **kwargs):
 
     data_id = list(f.keys())
 
@@ -56,8 +56,11 @@ def load_hdf5(f, halfrange, snapshot, mask, resize, **kwargs):
     elif isinstance(f, h5py.File):  
         img = f[data_id[stokes_ind]][:]
 
-            
-    if mask is not None:
+    if onlymask: 
+        # img = img.copy()
+        img = mask
+        
+    elif mask is not None:
         img = img.copy()
         img[mask] = 0
 
@@ -66,11 +69,11 @@ def load_hdf5(f, halfrange, snapshot, mask, resize, **kwargs):
 
 
 
-def load_img(f, ind, halfrange, mask, resize, **kwargs):
+def load_img(f, ind, halfrange, mask, onlymask, resize, **kwargs):
     if isinstance(f, h5py.File):
-        return load_hdf5(f, halfrange, ind, mask=mask, resize=resize, **kwargs)
+        return load_hdf5(f, halfrange, ind, mask=mask, onlymask=onlymask, resize=resize, **kwargs)
     with h5py.File(f, "r") as g:
-        return load_hdf5(g, halfrange, ind, mask=mask, resize=resize, **kwargs)
+        return load_hdf5(g, halfrange, ind, mask=mask, onlymask=onlymask, resize=resize, **kwargs)
 
 def load_summ(f, **kwargs):
     with h5py.File(f, "r") as h:
@@ -81,7 +84,7 @@ def load_summ(f, **kwargs):
         img   = load_img(h, **kwargs)
     return Mdot, Ladv, nuLnu, Ftot, img
 
-def load_mov(fs, snapshots, halfrange, mean=False, mask=None, resize=False, **kwargs):
+def load_mov(fs, snapshots, halfrange, mean=False, mask=None, onlymask=False, resize=False, **kwargs):
     if isinstance(fs, str):
         fs = [fs]
         
@@ -89,7 +92,7 @@ def load_mov(fs, snapshots, halfrange, mean=False, mask=None, resize=False, **kw
     imgs  = [] # collect arrays in list and then cast to np.array() in
                # d.Image() all at once is faster than concatenate
     for f, snapshot in zip( fs, snapshots ):
-        img = load_img(f, snapshot, halfrange, mask=mask, resize=resize, **kwargs)
+        img = load_img(f, snapshot, halfrange, mask=mask, onlymask=onlymask, resize=resize, **kwargs)
         times.append(img.meta.time)
         imgs.append(img)
 
